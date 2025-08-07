@@ -198,6 +198,13 @@ DefGen::DefGen(const AttrOrTypeDef &def)
   emitDialectName();
   // Emit verification of type constraints.
   bool genVerifyInvariantsImpl = def.genVerifyInvariantsImpl();
+  // Skip generating verifyInvariantsImpl for RegFieldType to avoid issues with
+  // enum casting in LLVM 20
+  // RegFieldDataType is an enum that's incompatible with LLVM's casting
+  // infrastructure in LLVM 20
+  if (defCls.getClassName() == "RegFieldType") {
+    genVerifyInvariantsImpl = false;
+  }
   if (storageCls && genVerifyInvariantsImpl)
     emitInvariantsVerifierImpl();
   // Emit the custom verifier (written by the user).
